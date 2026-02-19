@@ -37,11 +37,30 @@ const client = new Client({
 client.on('qr', (qr) => {
     qrcode.generate(qr, { small: true });
     console.log('QR RECEIVED', qr);
+    console.log('Scan the QR Code above to log in!');
+});
+
+client.on('loading_screen', (percent, message) => {
+    console.log('LOADING SCREEN', percent, message);
+});
+
+client.on('authenticated', () => {
+    console.log('AUTHENTICATED');
+});
+
+client.on('auth_failure', msg => {
+    console.error('AUTHENTICATION FAILURE', msg);
 });
 
 client.on('ready', () => {
     console.log('Client is ready!');
 });
+
+// ... (other code)
+
+// Start Client
+console.log('Initializing WhatsApp Client...');
+client.initialize().catch(err => console.error('Client Initialization Error:', err));
 
 // --- Queue & Worker Setup ---
 let stickerQueue;
