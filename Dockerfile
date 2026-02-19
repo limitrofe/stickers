@@ -45,6 +45,8 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /usr/src/app
 
+ENV XDG_RUNTIME_DIR=/tmp
+
 COPY package*.json ./
 
 RUN npm install

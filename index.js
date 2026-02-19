@@ -196,20 +196,35 @@ async function processStickerJob(data) {
         // --- 1. BACKGROUND REMOVAL ---
         try {
             console.log('Removing background...');
-            // removeBackground returns a Blob (usually PNG)
-            const blob = await removeBackground(`file://${filePath}`); 
-            const arrayBuffer = await blob.arrayBuffer();
             
-            // Validate if we got a valid buffer
+            // Race between background removal and a 60s timeout
+            const bgPromise = removeBackground(`file://${filePath}`, {
+                progress: (key, current, total) => {
+                    console.log(`[BG] ${key}: ${current}/${total}`);
+                },
+                debug: true,
+                model: 'isnet' // explicit model might help
+            });
+            
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Background removal timed out')), 60000)
+            );
+
+            // removeBackground returns a Blob (usually PNG)
+            const blob = await Promise.race([bgPromise, timeoutPromise]);
+            const arrayBuffer = await blob.arrayBuffer();
+
+            // Validate if we got a buffer
             if (arrayBuffer.byteLength > 0) {
                  mediaData = Buffer.from(arrayBuffer);
                  console.log(`Background removed! New size: ${mediaData.length} bytes`);
             } else {
                  console.warn('Background removal returned empty buffer. Using original.');
             }
-            
+
         } catch (bgError) {
-            console.error('Background removal failed:', bgError);
+            console.error('Background removal failed (using original):', bgError);
+            // Fallback: Proceed with original image if bg removal fails
         }
 
         // --- 2. WHITE OUTLINE ---
