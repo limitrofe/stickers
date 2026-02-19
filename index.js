@@ -38,7 +38,8 @@ const client = new Client({
             '--disable-gpu'
         ],
         headless: true,
-        dumpio: true
+        dumpio: true,
+        protocolTimeout: 180000 // 180s timeout as requested
     }
 });
 
