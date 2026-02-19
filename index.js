@@ -44,6 +44,7 @@ const client = new Client({
 });
 
 client.on('qr', (qr) => {
+    latestQr = qr; // Save for web view
     console.log('QR CODE STRING (Copy this if the image is bad):');
     console.log(qr);
     
@@ -58,6 +59,8 @@ client.on('loading_screen', (percent, message) => {
 
 client.on('authenticated', () => {
     console.log('AUTHENTICATED');
+    isAuthenticated = true;
+    latestQr = null;
 });
 
 client.on('auth_failure', msg => {
@@ -338,10 +341,47 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Store the latest QR code
+let latestQr = null;
+let isAuthenticated = false;
+
 app.use(express.static('public'));
 
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
+});
+
+// New Endpoint: View QR Code in Browser
+app.get('/qr', (req, res) => {
+    if (isAuthenticated) {
+        return res.send('<html><body><h1>Authenticated! Bot is ready.</h1></body></html>');
+    }
+    if (!latestQr) {
+        return res.send('<html><body><h1>Waiting for QR Code...</h1><script>setTimeout(() => location.reload(), 2000);</script></body></html>');
+    }
+    
+    // Serve HTML that renders the QR code locally using a CDN library
+    res.send(`
+        <html>
+            <head>
+                <title>WhatsApp QR Code</title>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+                <meta http-equiv="refresh" content="10"> <!-- Refresh every 10s to ensure fresh code -->
+                <style>
+                    body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
+                    #qrcode { margin: 20px; }
+                </style>
+            </head>
+            <body>
+                <h1>Scan this QR Code</h1>
+                <div id="qrcode"></div>
+                <p>Refreshes every 10 seconds...</p>
+                <script>
+                    new QRCode(document.getElementById("qrcode"), "${latestQr}");
+                </script>
+            </body>
+        </html>
+    `);
 });
 
 app.listen(port, () => {
