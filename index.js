@@ -37,7 +37,8 @@ const client = new Client({
             '--no-first-run',
             '--disable-gpu'
         ],
-        headless: true
+        headless: true,
+        protocolTimeout: 60000 // Increase timeout for sticker sending
     }
 });
 
