@@ -21,26 +21,16 @@ if (!fs.existsSync('temp')) {
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--single-process', // Try single process to save memory
-            '--disable-gpu',
-            '--disable-extensions',
-            '--disable-default-apps',
-            '--disable-sync',
-            '--disable-background-networking',
-            '--disable-translate',
-            '--metrics-recording-only',
-            '--safebrowsing-disable-auto-update',
-            '--disable-features=site-per-process', // Critical for low memory
-            '--mute-audio'
+            '--disable-gpu'
         ],
-        headless: true
+        headless: true,
+        dumpio: true // Enable browser logging to stdout/stderr for debugging
     }
 });
 
