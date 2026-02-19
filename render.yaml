@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: sticker-whatsapp
+    runtime: docker
+    plan: free
+    region: oregon 
+    buildCommand: docker build -t sticker-whatsapp .
+    startCommand: docker run -p 3000:3000 sticker-whatsapp
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: true
