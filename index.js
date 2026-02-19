@@ -266,15 +266,21 @@ function checkRateLimit(chatId) {
 }
 
 // --- Message Listener ---
-client.on('message', async msg => {
+client.on('message_create', async msg => {
     // Determine chat ID (handle 'Note to Self' vs normal chat)
     const chatId = msg.from;
     
     // DEBUG: Log everything for now
-    console.log(`[DEBUG] Message from ${chatId} | Type: ${msg.type} | HasMedia: ${msg.hasMedia}`);
+    console.log(`[DEBUG] Message from ${chatId} (fromMe: ${msg.fromMe}) | Type: ${msg.type} | HasMedia: ${msg.hasMedia}`);
 
     // IGNORE GROUPS AND STATUS UPDATES
     if (chatId.includes('@g.us') || chatId === 'status@broadcast') {
+        return;
+    }
+    
+    // Safety: Ignore my own stickers to prevent infinite loops
+    // (But allow my own IMAGES so I can test in "Note to Self")
+    if (msg.fromMe && msg.type !== 'image') {
         return;
     }
 
