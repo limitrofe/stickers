@@ -17,6 +17,14 @@ if (!fs.existsSync('temp')) {
     fs.mkdirSync('temp');
 }
 
+// CLEANUP: Delete session data on start to avoid "SingletonLock" errors
+// Since Render Free Tier is ephemeral, we can't trust the local file system for persistence anyway.
+const sessionDir = path.join(__dirname, '.wwebjs_auth');
+if (fs.existsSync(sessionDir)) {
+    console.log('Cleaning up stuck session...');
+    fs.rmSync(sessionDir, { recursive: true, force: true });
+}
+
 // --- WhatsApp Client Setup ---
 const client = new Client({
     authStrategy: new LocalAuth(),
