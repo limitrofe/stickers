@@ -35,8 +35,11 @@ const client = new Client({
 });
 
 client.on('qr', (qr) => {
+    console.log('QR CODE STRING (Copy this if the image is bad):');
+    console.log(qr);
+    
+    // Generate terminal QR with small flag
     qrcode.generate(qr, { small: true });
-    console.log('QR RECEIVED', qr);
     console.log('Scan the QR Code above to log in!');
 });
 
