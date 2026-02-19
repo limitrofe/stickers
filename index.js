@@ -37,7 +37,6 @@ const client = new Client({
             '--no-first-run',
             '--disable-gpu'
         ],
-        ],
         headless: true,
         dumpio: true
     }
