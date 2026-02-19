@@ -17,13 +17,12 @@ if (!fs.existsSync('temp')) {
     fs.mkdirSync('temp');
 }
 
-// CLEANUP: Delete session data on start to avoid "SingletonLock" errors
-// Since Render Free Tier is ephemeral, we can't trust the local file system for persistence anyway.
-const sessionDir = path.join(__dirname, '.wwebjs_auth');
-if (fs.existsSync(sessionDir)) {
-    console.log('Cleaning up stuck session...');
-    fs.rmSync(sessionDir, { recursive: true, force: true });
-}
+// Cleanup removed to allow persistence on Railway
+// const sessionDir = path.join(__dirname, '.wwebjs_auth');
+// if (fs.existsSync(sessionDir)) {
+//     console.log('Cleaning up stuck session...');
+//     fs.rmSync(sessionDir, { recursive: true, force: true });
+// }
 
 // --- WhatsApp Client Setup ---
 const client = new Client({
@@ -261,8 +260,8 @@ async function processStickerJob(data) {
 }
 
 // --- Rate Limiting Setup ---
-const DAILY_LIMIT = 25;
-const MAX_FILE_SIZE_BYTES = 200 * 1024; // 200KB
+const DAILY_LIMIT = 10; // Reduced limit for safety
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 const userUsage = new Map(); // Key: chatId, Value: { count: 0, date: 'YYYY-MM-DD' }
 
 function checkRateLimit(chatId) {
@@ -283,7 +282,7 @@ function checkRateLimit(chatId) {
 }
 
 // --- Message Listener ---
-client.on('message_create', async msg => {
+client.on('message', async msg => {
     // Determine chat ID (handle 'Note to Self' vs normal chat)
     const chatId = msg.from;
     
@@ -292,12 +291,6 @@ client.on('message_create', async msg => {
 
     // IGNORE GROUPS AND STATUS UPDATES
     if (chatId.includes('@g.us') || chatId === 'status@broadcast') {
-        return;
-    }
-    
-    // Safety: Ignore my own stickers to prevent infinite loops
-    // (But allow my own IMAGES so I can test in "Note to Self")
-    if (msg.fromMe && msg.type !== 'image') {
         return;
     }
 
