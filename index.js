@@ -36,10 +36,10 @@ const client = new Client({
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
+            '--single-process', 
             '--disable-gpu'
         ],
-        headless: true,
-        dumpio: true // Enable browser logging to stdout/stderr for debugging
+        headless: true
     }
 });
 
