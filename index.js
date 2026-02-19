@@ -28,7 +28,17 @@ const client = new Client({
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--disable-gpu'
+            '--single-process', // Try single process to save memory
+            '--disable-gpu',
+            '--disable-extensions',
+            '--disable-default-apps',
+            '--disable-sync',
+            '--disable-background-networking',
+            '--disable-translate',
+            '--metrics-recording-only',
+            '--safebrowsing-disable-auto-update',
+            '--disable-features=site-per-process', // Critical for low memory
+            '--mute-audio'
         ],
         headless: true
     }
