@@ -282,7 +282,7 @@ function checkRateLimit(chatId) {
 }
 
 // --- Message Listener ---
-client.on('message', async msg => {
+client.on('message_create', async msg => {
     // Determine chat ID (handle 'Note to Self' vs normal chat)
     const chatId = msg.from;
     
@@ -294,9 +294,14 @@ client.on('message', async msg => {
         return;
     }
 
+    // PREVENT INFINITE LOOP: If we sent a sticker (either manually or via bot), ignore it to avoid converting it again
+    if (msg.fromMe && msg.type === 'sticker') {
+        return;
+    }
+
     // Filter: Only process images
     if (msg.hasMedia && (msg.type === 'image' || msg.type === 'sticker')) {
-        console.log(`Received image from ${chatId}`);
+        console.log(`Received media from ${chatId}`);
 
         // 1. Check Rate Limit
         if (!checkRateLimit(chatId)) {
@@ -351,7 +356,7 @@ client.on('message', async msg => {
 });
 
 // Start Client
-client.initialize();
+// client.initialize(); // Removed dual initialization
 
 // --- Web Server for Health Check & Landing Page ---
 const express = require('express');
